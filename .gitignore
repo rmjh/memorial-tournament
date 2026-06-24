@@ -1,0 +1,5 @@
+# Claude Code local session state
+.claude/
+
+# macOS
+.DS_Store
