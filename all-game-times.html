@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memorial — Possible Game Times | 2026 State Tournament</title>
+<style>
+  :root{
+    --ink:#16221c;
+    --paper:#fbfaf5;
+    --card:#ffffff;
+    --line:#d9d6cb;
+    --win:#1b5e3f;        /* winners' bracket green */
+    --win-bg:#e9f3ee;
+    --elim:#b45309;       /* elimination amber */
+    --elim-bg:#fbf0e2;
+    --champ:#9a6b15;      /* championship gold */
+    --champ-bg:#fbf3d9;
+    --muted:#6b6f68;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  .eyebrow{
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin:0 0 6px;
+  }
+  h1{
+    font-size:30px;line-height:1.05;margin:0 0 4px;letter-spacing:-.01em;
+  }
+  h1 .team{color:var(--win);}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 22px;}
+  .howto{
+    background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ink);
+    border-radius:8px;padding:14px 16px;margin:0 0 26px;font-size:13.5px;
+  }
+  .howto b{font-weight:700;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;}
+  .chip{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;border:1px solid transparent;}
+  .chip.win{background:var(--win-bg);color:var(--win);border-color:#c4ddd0;}
+  .chip.elim{background:var(--elim-bg);color:var(--elim);border-color:#eccfa9;}
+  .chip.champ{background:var(--champ-bg);color:var(--champ);border-color:#e6cf91;}
+
+  section{margin:0 0 40px;}
+  .div-head{display:flex;align-items:baseline;gap:12px;margin:0 0 4px;
+    border-bottom:3px solid var(--ink);padding-bottom:6px;}
+  .div-head h2{font-size:22px;margin:0;letter-spacing:-.01em;}
+  .div-head .where{color:var(--muted);font-size:12.5px;margin-left:auto;text-align:right;}
+
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;}
+  thead th{
+    text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;padding:0 12px 8px;border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody tr{background:var(--card);}
+  tr.win td:first-child{box-shadow:inset 4px 0 0 var(--win);}
+  tr.elim td:first-child{box-shadow:inset 4px 0 0 var(--elim);}
+  tr.champ td{background:var(--champ-bg);}
+  tr.champ td:first-child{box-shadow:inset 4px 0 0 var(--champ);}
+  .when{white-space:nowrap;font-weight:700;}
+  .when .date{display:block;font-size:13px;}
+  .when .time{display:block;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:1px;}
+  .gtag{white-space:nowrap;font-weight:700;font-size:13px;}
+  .btype{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:block;margin-top:3px;}
+  .btype.win{color:var(--win);}
+  .btype.elim{color:var(--elim);}
+  .btype.champ{color:var(--champ);}
+  .scenario{font-size:13.5px;}
+  .scenario b{font-weight:700;}
+  .scenario .or{display:inline-block;background:#eee;color:#555;font-size:10.5px;font-weight:700;
+    padding:1px 6px;border-radius:4px;letter-spacing:.06em;margin:0 2px;vertical-align:middle;}
+  .notes{font-size:12.5px;color:var(--muted);margin-top:16px;}
+  .notes li{margin-bottom:5px;}
+  .foot{font-size:12px;color:var(--muted);text-align:center;margin-top:40px;border-top:1px solid var(--line);padding-top:14px;}
+  @media (max-width:560px){
+    h1{font-size:24px;}
+    tbody td{padding:11px 8px;}
+    .when .time{font-size:15px;}
+  }
+  @media print{
+    body{padding:0;background:#fff;}
+    .howto,.foot{break-inside:avoid;}
+    section{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">2026 Nebraska State Little League Tournament · Patriot Park, Kearney</p>
+  <h1>When does <span class="team">Memorial</span> play?</h1>
+  <p class="sub">Every game Memorial could play, and exactly what has to happen for each one.</p>
+
+  <div class="howto">
+    <b>How to read this.</b> It's a double-elimination tournament: <b>two losses and you're out.</b>
+    A win sends Memorial deeper into the <span style="color:var(--win);font-weight:700">winners' bracket</span>;
+    a loss drops them into the <span style="color:var(--elim);font-weight:700">elimination bracket</span>, where one more loss ends their run.
+    Each row below is a game Memorial <i>could</i> reach — read the right-hand column to see what makes it happen.
+    Times are scheduled <b>start</b> times and can run early or late depending on the previous game, weather, field prep, and umpires.
+    <div class="legend">
+      <span class="chip win">Winners' bracket</span>
+      <span class="chip elim">Elimination bracket</span>
+      <span class="chip champ">Championship</span>
+    </div>
+  </div>
+
+  <!-- ===================== MAJORS ===================== -->
+  <section>
+    <div class="div-head">
+      <h2>Majors</h2>
+      <span class="where">All games on the Championship Field<br>(Patriot Park, Diamond #3)</span>
+    </div>
+    <p class="sub" style="margin:8px 0 0;">Memorial opens in <b>Game 1 vs Hillside</b>.</p>
+
+    <table>
+      <thead>
+        <tr><th style="width:120px">When</th><th style="width:96px">Game</th><th>Memorial plays this game when…</th></tr>
+      </thead>
+      <tbody>
+        <tr class="win">
+          <td class="when"><span class="date">Thu, Jul 9</span><span class="time">1:00 PM</span></td>
+          <td><span class="gtag">Game 1</span><span class="btype win">Winners</span></td>
+          <td class="scenario"><b>Always.</b> This is Memorial's opening game (vs Hillside).</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Fri, Jul 10</span><span class="time">8:30 PM</span></td>
+          <td><span class="gtag">Game 8</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Memorial <b>loses Game 1</b>.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sat, Jul 11</span><span class="time">12:30 PM</span></td>
+          <td><span class="gtag">Game 10</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Lost Game 1, then <b>won Game 8</b>.</td>
+        </tr>
+        <tr class="win">
+          <td class="when"><span class="date">Sat, Jul 11</span><span class="time">3:00 PM</span></td>
+          <td><span class="gtag">Game 11</span><span class="btype win">Winners</span></td>
+          <td class="scenario">Memorial <b>wins Game 1</b>.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sun, Jul 12</span><span class="time">3:00 PM<sup>*</sup></span></td>
+          <td><span class="gtag">Game 14</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Won Game 1, then lost Game 11 <span class="or">or</span> lost Game 1, won Game 8, won Game 10.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Fri, Jul 17</span><span class="time">6:00 PM</span></td>
+          <td><span class="gtag">Game 15</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Still alive after <b>winning Game 14</b>.</td>
+        </tr>
+        <tr class="win">
+          <td class="when"><span class="date">Fri, Jul 17</span><span class="time">8:30 PM</span></td>
+          <td><span class="gtag">Game 16</span><span class="btype win">Winners · Final</span></td>
+          <td class="scenario">Memorial is <b>2–0</b> (won Games 1 and 11). Winners'-bracket final.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sat, Jul 18</span><span class="time">11:00 AM</span></td>
+          <td><span class="gtag">Game 17</span><span class="btype elim">Elimination · Final</span></td>
+          <td class="scenario">Won Game 15 <span class="or">or</span> was 2–0 then lost the winners' final (Game 16).</td>
+        </tr>
+        <tr class="champ">
+          <td class="when"><span class="date">Sun, Jul 19</span><span class="time">12:00 PM</span></td>
+          <td><span class="gtag">Game 18</span><span class="btype champ">Championship</span></td>
+          <td class="scenario">Memorial is the winners'-bracket champ (won 1, 11, 16) <span class="or">or</span> won the elimination bracket (won Game 17).</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== MINORS ===================== -->
+  <section>
+    <div class="div-head">
+      <h2>Minors</h2>
+      <span class="where">All games on the Loyalty Field<br>(Patriot Park, Diamond #4)</span>
+    </div>
+    <p class="sub" style="margin:8px 0 0;">Memorial has a first-round bye and opens in <b>Game 6 on Thursday</b>.</p>
+
+    <table>
+      <thead>
+        <tr><th style="width:120px">When</th><th style="width:96px">Game</th><th>Memorial plays this game when…</th></tr>
+      </thead>
+      <tbody>
+        <tr class="win">
+          <td class="when"><span class="date">Thu, Jul 9</span><span class="time">4:00 PM</span></td>
+          <td><span class="gtag">Game 6</span><span class="btype win">Winners</span></td>
+          <td class="scenario"><b>Always.</b> This is Memorial's opening game.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sat, Jul 11</span><span class="time">11:00 AM</span></td>
+          <td><span class="gtag">Game 12</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Memorial <b>loses Game 6</b>.</td>
+        </tr>
+        <tr class="win">
+          <td class="when"><span class="date">Sat, Jul 11</span><span class="time">3:30 PM</span></td>
+          <td><span class="gtag">Game 14</span><span class="btype win">Winners</span></td>
+          <td class="scenario">Memorial <b>wins Game 6</b>.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sun, Jul 12</span><span class="time">12:00 PM</span></td>
+          <td><span class="gtag">Game 15</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Lost Game 6, then <b>won Game 12</b>.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sun, Jul 12</span><span class="time">2:00 PM</span></td>
+          <td><span class="gtag">Game 16</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Won Game 6, then <b>lost Game 14</b>.</td>
+        </tr>
+        <tr class="win">
+          <td class="when"><span class="date">Fri, Jul 17</span><span class="time">5:00 PM</span></td>
+          <td><span class="gtag">Game 17</span><span class="btype win">Winners · Final</span></td>
+          <td class="scenario">Memorial is <b>2–0</b> (won Games 6 and 14). Winners'-bracket final.</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Fri, Jul 17</span><span class="time">7:00 PM</span></td>
+          <td><span class="gtag">Game 18</span><span class="btype elim">Elimination</span></td>
+          <td class="scenario">Won Game 15 (lower path) <span class="or">or</span> won Game 16 (after losing Game 14).</td>
+        </tr>
+        <tr class="elim">
+          <td class="when"><span class="date">Sat, Jul 18</span><span class="time">1:30 PM</span></td>
+          <td><span class="gtag">Game 19</span><span class="btype elim">Elimination · Final</span></td>
+          <td class="scenario">Won Game 18 <span class="or">or</span> was 2–0 then lost the winners' final (Game 17).</td>
+        </tr>
+        <tr class="champ">
+          <td class="when"><span class="date">Sun, Jul 19</span><span class="time">2:30 PM</span></td>
+          <td><span class="gtag">Game 20</span><span class="btype champ">Championship</span></td>
+          <td class="scenario">Memorial is the winners'-bracket champ (won 6, 14, 17) <span class="or">or</span> won the elimination bracket (won Game 19).</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <ul class="notes">
+    <li><sup>*</sup> Majors Game 14: the bracket tab lists <b>3:00 PM</b>; the tournament's "Schedule of Games" tab lists <b>3:30 PM</b> for the same game. Worth confirming with the tournament director.</li>
+    <li>All times are scheduled <b>start</b> times. Per the bracket: games may start earlier or later depending on the previous game, weather, field prep, and umpire readiness. Be in the dugout 30 minutes before game time.</li>
+    <li>In double elimination, if the elimination-bracket team wins the championship game, an extra "if necessary" deciding game can be required. The bracket doesn't show one, but it's worth being ready for that possibility.</li>
+  </ul>
+
+  <p class="foot">Built from the 2026 State Tournament bracket · Majors &amp; Minors · times reflect the uploaded spreadsheet</p>
+
+</div>
+</body>
+</html>

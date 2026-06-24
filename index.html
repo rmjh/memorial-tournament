@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memorial — Game Scenario Runner</title>
+<style>
+  :root{
+    --ink:#16221c; --paper:#f1efe7; --card:#ffffff; --line:#dcd9ce;
+    --win:#1b5e3f; --win-bg:#e9f3ee;
+    --elim:#b45309; --elim-bg:#fbf0e2;
+    --champ:#9a6b15; --champ-bg:#fbf3d9;
+    --won:#1b5e3f; --lost:#b3261e;
+    --muted:#6b6f68;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.4;padding:18px 14px 48px;
+  }
+  .wrap{max-width:460px;margin:0 auto;}
+  .top{margin-bottom:14px;}
+  .eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 4px;}
+  h1{font-size:22px;margin:0 0 12px;letter-spacing:-.01em;}
+  h1 .team{color:var(--win);}
+
+  .divtoggle{display:flex;gap:8px;margin-bottom:6px;}
+  .divtoggle button{
+    flex:1;padding:11px;border:1.5px solid var(--line);background:var(--card);color:var(--muted);
+    border-radius:10px;font-size:14px;font-weight:800;letter-spacing:.02em;cursor:pointer;transition:.12s;
+  }
+  .divtoggle button.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  /* current game card */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:20px 18px 18px;margin-top:14px;position:relative;overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,.02),0 10px 24px -18px rgba(0,0,0,.35);
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--muted);}
+  .card.win::before{background:var(--win);}
+  .card.elim::before{background:var(--elim);}
+  .card.champ::before{background:var(--champ);}
+
+  .badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;margin-bottom:12px;}
+  .badge.win{background:var(--win-bg);color:var(--win);}
+  .badge.elim{background:var(--elim-bg);color:var(--elim);}
+  .badge.champ{background:var(--champ-bg);color:var(--champ);}
+
+  .gname{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin:0 0 2px;}
+  .gtime{font-size:40px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1;font-variant-numeric:tabular-nums;}
+  .gday{font-size:15px;font-weight:700;margin:4px 0 0;}
+  .gmeta{font-size:12.5px;color:var(--muted);margin:8px 0 0;}
+  .gmeta .opp{color:var(--ink);font-weight:600;}
+  .gnote{font-size:11.5px;color:var(--elim);margin:9px 0 0;font-weight:600;}
+
+  .qline{font-size:13px;font-weight:700;color:var(--muted);text-align:center;margin:18px 0 10px;}
+
+  .choices{display:flex;gap:10px;}
+  .choice{
+    flex:1;border:none;border-radius:13px;padding:14px 10px 12px;cursor:pointer;color:#fff;
+    text-align:center;transition:.12s;
+  }
+  .choice:active{transform:translateY(1px) scale(.99);}
+  .choice.won{background:var(--won);}
+  .choice.lost{background:var(--lost);}
+  .choice .verb{font-size:17px;font-weight:800;letter-spacing:.02em;display:block;}
+  .choice .arrow{font-size:11px;font-weight:700;opacity:.92;display:block;margin-top:5px;line-height:1.25;}
+
+  /* terminal */
+  .terminal{text-align:center;padding:26px 16px;}
+  .terminal .big{font-size:30px;font-weight:800;margin:6px 0 4px;letter-spacing:-.01em;}
+  .terminal .emoji{font-size:46px;line-height:1;}
+  .terminal.champ .big{color:var(--champ);}
+  .terminal.out .big{color:var(--lost);}
+  .terminal .desc{font-size:13.5px;color:var(--muted);max-width:300px;margin:8px auto 0;}
+
+  /* path */
+  .path{margin-top:20px;}
+  .path h3{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:800;}
+  .crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .crumb{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);
+    border-radius:8px;padding:5px 8px;font-size:11.5px;font-weight:700;}
+  .crumb .res{font-size:10px;font-weight:800;padding:1px 6px;border-radius:5px;color:#fff;}
+  .crumb .res.W{background:var(--won);}
+  .crumb .res.L{background:var(--lost);}
+  .crumb .tm{color:var(--muted);font-weight:600;}
+  .arrowsep{color:var(--muted);font-size:12px;}
+
+  .controls{display:flex;gap:8px;margin-top:18px;}
+  .controls button{flex:1;padding:11px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+    border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;}
+  .controls button:disabled{opacity:.4;cursor:default;}
+
+  .foot{font-size:11px;color:var(--muted);margin-top:22px;line-height:1.5;}
+  .foot b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <p class="eyebrow">2026 State Tournament · Patriot Park, Kearney</p>
+    <h1><span class="team">Memorial</span> — Scenario Runner</h1>
+    <div class="divtoggle">
+      <button id="btnMaj" class="active" onclick="setDiv('majors')">Majors</button>
+      <button id="btnMin" onclick="setDiv('minors')">Minors</button>
+    </div>
+  </div>
+
+  <div id="stage"></div>
+
+  <div class="controls">
+    <button id="backBtn" onclick="goBack()">↩ Undo last</button>
+    <button onclick="restart()">↺ Start over</button>
+  </div>
+
+  <div class="path" id="pathBox" style="display:none">
+    <h3>Path so far</h3>
+    <div class="crumbs" id="crumbs"></div>
+  </div>
+
+  <p class="foot">
+    <b>How it works:</b> tap <b>Won</b> or <b>Lost</b> for each game to walk Memorial's path. A loss drops them into the
+    elimination bracket; a second loss ends the run. Each button shows where that result leads next.<br><br>
+    Times are scheduled <b>start</b> times and can run early or late (previous game, weather, field prep, umpires) — be in the dugout 30 min early.
+    Majors play on the Championship Field (Diamond&nbsp;#3); Minors on the Loyalty Field (Diamond&nbsp;#4).
+    <br><br>
+    <b>Other formats:</b>
+    <a href="all-game-times.html">Full printable table</a> ·
+    <a href="Memorial_Majors_Game_Times.pdf">Majors PDF</a> ·
+    <a href="Memorial_Minors_Game_Times.pdf">Minors PDF</a>
+  </p>
+</div>
+
+<script>
+const DIVISIONS = {
+  majors:{
+    name:"Majors", start:"G1",
+    games:{
+      G1:  {n:"Game 1",  day:"Thu, Jul 9",  time:"1:00 PM",  type:"win",  opp:"vs Hillside", win:"G11", loss:"G8"},
+      G8:  {n:"Game 8",  day:"Fri, Jul 10", time:"8:30 PM",  type:"elim", win:"G10", loss:"OUT"},
+      G10: {n:"Game 10", day:"Sat, Jul 11", time:"12:30 PM", type:"elim", win:"G14", loss:"OUT"},
+      G11: {n:"Game 11", day:"Sat, Jul 11", time:"3:00 PM",  type:"win",  win:"G16", loss:"G14"},
+      G14: {n:"Game 14", day:"Sun, Jul 12", time:"3:00 PM",  type:"elim", win:"G15", loss:"OUT", note:"Bracket says 3:00 PM; schedule tab says 3:30 PM."},
+      G15: {n:"Game 15", day:"Fri, Jul 17", time:"6:00 PM",  type:"elim", win:"G17", loss:"OUT"},
+      G16: {n:"Game 16", day:"Fri, Jul 17", time:"8:30 PM",  type:"win",  label:"Winners' Final", win:"G18", loss:"G17"},
+      G17: {n:"Game 17", day:"Sat, Jul 18", time:"11:00 AM", type:"elim", label:"Elimination Final", win:"G18", loss:"OUT"},
+      G18: {n:"Game 18", day:"Sun, Jul 19", time:"12:00 PM", type:"champ", label:"Championship", champ:true},
+      IFNEC:{n:"Deciding Game", day:"Sun, Jul 19", time:"after Game 18", type:"champ", label:"Winner-take-all · if necessary", ifnec:true},
+    }
+  },
+  minors:{
+    name:"Minors", start:"G6",
+    games:{
+      G6:  {n:"Game 6",  day:"Thu, Jul 9",  time:"4:00 PM",  type:"win",  opp:"vs winner of Kearney / Twin Valley 1", win:"G14", loss:"G12"},
+      G12: {n:"Game 12", day:"Sat, Jul 11", time:"11:00 AM", type:"elim", win:"G15", loss:"OUT"},
+      G14: {n:"Game 14", day:"Sat, Jul 11", time:"3:30 PM",  type:"win",  win:"G17", loss:"G16"},
+      G15: {n:"Game 15", day:"Sun, Jul 12", time:"12:00 PM", type:"elim", win:"G18", loss:"OUT"},
+      G16: {n:"Game 16", day:"Sun, Jul 12", time:"2:00 PM",  type:"elim", win:"G18", loss:"OUT"},
+      G17: {n:"Game 17", day:"Fri, Jul 17", time:"5:00 PM",  type:"win",  label:"Winners' Final", win:"G20", loss:"G19"},
+      G18: {n:"Game 18", day:"Fri, Jul 17", time:"7:00 PM",  type:"elim", win:"G19", loss:"OUT"},
+      G19: {n:"Game 19", day:"Sat, Jul 18", time:"1:30 PM",  type:"elim", label:"Elimination Final", win:"G20", loss:"OUT"},
+      G20: {n:"Game 20", day:"Sun, Jul 19", time:"2:30 PM",  type:"champ", label:"Championship", champ:true},
+      IFNEC:{n:"Deciding Game", day:"Sun, Jul 19", time:"after Game 20", type:"champ", label:"Winner-take-all · if necessary", ifnec:true},
+    }
+  }
+};
+
+let div = "majors";
+let state = null; // {id, losses, history:[{id,choice,time,n}]}
+
+function setDiv(d){
+  div = d;
+  document.getElementById('btnMaj').classList.toggle('active', d==='majors');
+  document.getElementById('btnMin').classList.toggle('active', d==='minors');
+  restart();
+}
+function restart(){
+  state = {id: DIVISIONS[div].start, losses:0, history:[]};
+  render();
+}
+function goBack(){
+  if(!state.history.length) return;
+  const last = state.history.pop();
+  if(last.choice==='L') state.losses = Math.max(0, state.losses-1);
+  state.id = last.id;
+  render();
+}
+
+// resolve where a choice leads from current node, given current losses
+function targetOf(node, outcome){
+  if(node.champ){
+    // entered with state.losses already set (0 = WB champ, 1 = elim champ)
+    if(state.losses===0) return outcome==='W' ? 'CHAMP' : 'IFNEC';
+    else                 return outcome==='W' ? 'IFNEC' : 'RUNNERUP';
+  }
+  if(node.ifnec){
+    return outcome==='W' ? 'CHAMP' : 'RUNNERUP';
+  }
+  return outcome==='W' ? node.win : node.loss;
+}
+
+function describeTarget(t){
+  if(t==='CHAMP')    return {label:"🏆 State Champions", sub:""};
+  if(t==='RUNNERUP') return {label:"State Runner-up", sub:"(2nd loss — eliminated)"};
+  if(t==='OUT')      return {label:"Eliminated", sub:"(2nd loss — run ends)"};
+  const g = DIVISIONS[div].games[t];
+  return {label:"→ "+g.n, sub:g.day+" · "+g.time};
+}
+
+function choose(outcome){
+  const node = DIVISIONS[div].games[state.id];
+  const t = targetOf(node, outcome);
+  state.history.push({id:state.id, choice:outcome, time:node.time, n:node.n});
+  if(outcome==='L') state.losses++;
+  if(t==='CHAMP'||t==='RUNNERUP'||t==='OUT'){ state.id = t; }
+  else { state.id = t; }
+  render();
+}
+
+function render(){
+  const stage = document.getElementById('stage');
+  document.getElementById('backBtn').disabled = state.history.length===0;
+  renderPath();
+
+  // terminal states
+  if(state.id==='CHAMP'){
+    stage.innerHTML = terminalHTML('champ','🏆','State Champions!',
+      'Memorial wins the '+DIVISIONS[div].name+' division. Undefeated run or fought back through the elimination bracket — either way, title secured.');
+    return;
+  }
+  if(state.id==='RUNNERUP'){
+    stage.innerHTML = terminalHTML('out','🥈','State Runner-up',
+      'Two losses in the championship round. A great run to the final game of the '+DIVISIONS[div].name+' division.');
+    return;
+  }
+  if(state.id==='OUT'){
+    const games = state.history.length;
+    stage.innerHTML = terminalHTML('out','🛑','Eliminated',
+      'Memorial picked up a second loss. Their tournament ends after '+games+' game'+(games===1?'':'s')+'.');
+    return;
+  }
+
+  // active game card
+  const g = DIVISIONS[div].games[state.id];
+  const winT = describeTarget(targetOf(g,'W'));
+  const lossT = describeTarget(targetOf(g,'L'));
+  let metaBits = [];
+  if(g.label) metaBits.push(g.label);
+  if(g.opp) metaBits.push('<span class="opp">'+g.opp+'</span>');
+  const meta = metaBits.length ? '<p class="gmeta">'+metaBits.join(' &nbsp;·&nbsp; ')+'</p>' : '';
+  const note = g.note ? '<p class="gnote">⚠︎ '+g.note+'</p>' : '';
+  const badgeTxt = g.type==='win'?'Winners\' Bracket':(g.type==='elim'?'Elimination Bracket':(g.ifnec?'If Necessary':'Championship'));
+
+  stage.innerHTML = `
+    <div class="card ${g.type}">
+      <span class="badge ${g.type}">${badgeTxt}</span>
+      <p class="gname">${g.n}</p>
+      <p class="gtime">${g.time}</p>
+      <p class="gday">${g.day}</p>
+      ${meta}
+      ${note}
+    </div>
+    <p class="qline">How did Memorial do?</p>
+    <div class="choices">
+      <button class="choice won" onclick="choose('W')">
+        <span class="verb">Won ✓</span>
+        <span class="arrow">${winT.label}<br>${winT.sub}</span>
+      </button>
+      <button class="choice lost" onclick="choose('L')">
+        <span class="verb">Lost ✗</span>
+        <span class="arrow">${lossT.label}<br>${lossT.sub}</span>
+      </button>
+    </div>`;
+}
+
+function terminalHTML(cls,emoji,big,desc){
+  return `<div class="card ${cls==='champ'?'champ':'elim'}">
+    <div class="terminal ${cls}">
+      <div class="emoji">${emoji}</div>
+      <div class="big">${big}</div>
+      <div class="desc">${desc}</div>
+    </div></div>`;
+}
+
+function renderPath(){
+  const box = document.getElementById('pathBox');
+  const crumbs = document.getElementById('crumbs');
+  if(!state.history.length){ box.style.display='none'; return; }
+  box.style.display='block';
+  let html = state.history.map(h =>
+    `<span class="crumb">${h.n} <span class="tm">${h.time}</span> <span class="res ${h.choice}">${h.choice}</span></span>`
+  ).join('<span class="arrowsep">→</span>');
+  // append where they are now (if still playing)
+  if(!['CHAMP','RUNNERUP','OUT'].includes(state.id)){
+    const g = DIVISIONS[div].games[state.id];
+    html += `<span class="arrowsep">→</span><span class="crumb" style="border-color:var(--ink)">${g.n} <span class="tm">${g.time}</span></span>`;
+  }
+  crumbs.innerHTML = html;
+}
+
+restart();
+</script>
+</body>
+</html>
