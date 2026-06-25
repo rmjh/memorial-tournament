@@ -377,6 +377,8 @@ function renderPath(){
 }
 
 restart();
+// Pull published scores so the planner reflects real results for everyone (your own edits stay put).
+Tournament.loadPublished(function(changed){ if(changed) restart(); });
 </script>
 </body>
 </html>

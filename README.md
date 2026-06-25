@@ -25,18 +25,34 @@ Once GitHub Pages is enabled, the runner is the homepage:
 | `index.html` | Interactive scenario runner (the homepage) |
 | `bracket/index.html` | Full interactive bracket + score tracker for both divisions |
 | `tournament.js` | Shared bracket data + resolution engine used by both pages |
+| `scores.json` | Published scores everyone loads (updated by the scorekeeper — see below) |
 | `all-game-times.html` | Full printable table of every possible Memorial game, both divisions |
 | `Memorial_Majors_Game_Times.pdf` | One-page Majors reference |
 | `Memorial_Minors_Game_Times.pdf` | One-page Minors reference |
 
 ## How the tracker works
 
-- **Scores are saved per browser/device** (`localStorage`) — nothing is uploaded or shared
-  between phones. Each person tracking keeps their own copy.
 - **List & scores** view is chronological with a score box per team; **Bracket** view draws
   the same data as a double-elim bracket. Games involving Memorial are highlighted.
 - **GameChanger links** can be pasted per team; a `GC` chip then appears for one-tap access
   to box scores and pitch counts.
+
+### Sharing scores (one scorekeeper, everyone reads)
+
+GitHub Pages is static — it can serve a shared file but can't accept writes. So scoring uses a
+**single-scorekeeper** model:
+
+1. The scorekeeper enters scores in the bracket tracker (saved locally in their browser as they go).
+2. **Share scores → Export `scores.json`** downloads the current scores.
+3. They upload `scores.json` to the **repo root** on GitHub (drag-and-drop → commit).
+4. Anyone who opens the page loads `scores.json` automatically — so everyone sees the latest
+   published scores on refresh. The published results also feed the scenario planner.
+
+Notes:
+- Only the scorekeeper's edits ever change the shared file; viewers' pages stay read-only copies.
+- Your own in-progress edits are kept locally and are **not** overwritten by the published file
+  (the **Load published** button force-pulls the latest if you want to resync).
+- To wipe scores (e.g. after testing): **Clear all scores**, then Export and upload the blank file.
 
 ## Notes
 

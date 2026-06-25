@@ -129,6 +129,17 @@
   .gcrow input{flex:1;min-width:0;font-size:12.5px;border:1.5px solid var(--line);border-radius:8px;padding:7px 8px;}
   .gcrow input:focus{outline:none;border-color:var(--win);}
 
+  .synced{font-size:12px;color:var(--muted);margin:0 0 12px;}
+  .steps{margin:0 0 14px 18px;padding:0;font-size:12.5px;color:var(--ink);}
+  .steps li{margin-bottom:6px;}
+  .steps code{background:#f4f3ee;padding:1px 5px;border-radius:4px;font-size:11.5px;}
+  .sharebtns{display:flex;gap:8px;flex-wrap:wrap;}
+  .sharebtns button{flex:1;min-width:140px;padding:11px;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;}
+  #btnExport{background:var(--win);color:#fff;}
+  #btnLoadPub{background:var(--card);color:var(--ink);border:1.5px solid var(--line);}
+  .danger{font-size:12px;color:var(--muted);margin:14px 0 0;}
+  .linkbtn{background:none;border:none;color:var(--lost);font-weight:800;cursor:pointer;padding:0;font-size:12px;text-decoration:underline;}
+
   .foot{font-size:11px;color:var(--muted);margin-top:24px;line-height:1.6;}
   .foot b{color:var(--ink);}
   .foot a{font-weight:700;}
@@ -152,10 +163,11 @@
   <div id="stage"></div>
 
   <div class="tools">
-    <button id="btnGc">⚾ GameChanger links</button>
-    <button id="btnReset">↺ Reset scores</button>
+    <button id="btnGc">⚾ GameChanger</button>
+    <button id="btnShare">⬆ Share scores</button>
   </div>
   <div id="gcpanel" class="panel"></div>
+  <div id="sharepanel" class="panel"></div>
 
   <p class="foot">
     <b>Enter a final score</b> for each game and the winner advances automatically — undecided games show
@@ -175,6 +187,7 @@ let view = "list";
 const stage = document.getElementById('stage');
 const mnext = document.getElementById('mnext');
 const gcpanel = document.getElementById('gcpanel');
+const sharepanel = document.getElementById('sharepanel');
 
 /* ---------- helpers ---------- */
 const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -387,17 +400,46 @@ gcpanel.addEventListener('change', e=>{
   T.setGcLink(div, inp.dataset.team, inp.value.trim());
   if(view==='list') renderList();
 });
+function renderShare(){
+  sharepanel.innerHTML = `
+    <h3>Share scores with everyone</h3>
+    <p class="synced">You're the scorekeeper. Publish your scores so anyone who opens the page sees them — no JSON editing needed.</p>
+    <ol class="steps">
+      <li>Tap <b>Export scores.json</b> below.</li>
+      <li>On GitHub, open the repo and drag <code>scores.json</code> into the file list (repo root) → <b>Commit changes</b>.</li>
+      <li>Everyone who opens the page now loads these scores (on refresh).</li>
+    </ol>
+    <div class="sharebtns">
+      <button id="btnExport">⬇ Export scores.json</button>
+      <button id="btnLoadPub">↻ Load published</button>
+    </div>
+    <p class="danger">Testing? <button class="linkbtn" id="btnClearAll">Clear all scores</button> wipes every score in both divisions, so you can export a blank file and upload it to remove the test data.</p>`;
+  sharepanel.querySelector('#btnExport').onclick=()=>T.downloadScores();
+  sharepanel.querySelector('#btnLoadPub').onclick=()=>{
+    if(confirm('Replace what you see with the latest published scores from GitHub?')){
+      T.loadPublished(ok=>{ renderAll(); if(!ok) alert('Could not find a published scores.json (or nothing to load).'); }, true);
+    }
+  };
+  sharepanel.querySelector('#btnClearAll').onclick=()=>{
+    if(confirm('Clear ALL scores in both divisions? Then Export a blank file and upload it to publish the wipe.')){
+      T.clearAll(); renderAll();
+    }
+  };
+}
 document.getElementById('btnGc').addEventListener('click',()=>{
+  sharepanel.classList.remove('open');
   gcpanel.classList.toggle('open');
   if(gcpanel.classList.contains('open')) renderGc();
 });
-document.getElementById('btnReset').addEventListener('click',()=>{
-  if(confirm('Clear all entered scores for '+T.DATA[div].name+'? (GameChanger links are kept.)')){
-    T.clearDivision(div); renderAll();
-  }
+document.getElementById('btnShare').addEventListener('click',()=>{
+  gcpanel.classList.remove('open');
+  sharepanel.classList.toggle('open');
+  if(sharepanel.classList.contains('open')) renderShare();
 });
 
 renderAll();
+// Viewers (no local edits) auto-load the published scores.json; your own edits stay put.
+T.loadPublished(changed=>{ if(changed) renderAll(); });
 </script>
 </body>
 </html>

@@ -77,29 +77,83 @@
     }
   };
 
-  /* ---------- storage ---------- */
+  /* ---------- storage ----------
+     STATE is the in-memory working copy. localStorage is written ONLY once you edit
+     (the `edited` flag). Anyone who hasn't edited auto-loads the published scores.json,
+     so viewers always see the latest you've published; your own edits are never clobbered. */
   var STORE_KEY = "mt_state_v1";
-  function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
-  function save(s) { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {} }
-  function divStore(s, div) { s[div] = s[div] || {}; s[div].results = s[div].results || {}; s[div].gc = s[div].gc || {}; return s[div]; }
+  var STATE = { major: { results: {}, gc: {} }, minor: { results: {}, gc: {} } };
+  var edited = false;
 
-  function getScore(div, gid) { var d = load()[div]; return (d && d.results && d.results[gid]) || null; }
+  // scores.json lives next to tournament.js (repo root) — resolve it no matter which page loads us.
+  var SCRIPT_SRC = (typeof document !== "undefined" && document.currentScript && document.currentScript.src) || "";
+  var SCORES_URL = SCRIPT_SRC ? new URL("scores.json", SCRIPT_SRC).href : "scores.json";
+
+  (function initFromLocal() {
+    try {
+      var s = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (s && s.edited) {
+        edited = true;
+        ["major", "minor"].forEach(function (d) {
+          if (s[d]) { STATE[d].results = s[d].results || {}; STATE[d].gc = s[d].gc || {}; }
+        });
+      }
+    } catch (e) {}
+  })();
+
+  function persist() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ edited: edited, major: STATE.major, minor: STATE.minor })); } catch (e) {}
+  }
+  function markEdited() { edited = true; persist(); }
+
+  function getScore(div, gid) { return STATE[div].results[gid] || null; }
   function setScore(div, gid, a, b) {
-    var s = load(), ds = divStore(s, div);
     var na = (a === "" || a == null || (typeof a === "number" && isNaN(a))) ? null : a;
     var nb = (b === "" || b == null || (typeof b === "number" && isNaN(b))) ? null : b;
-    if (na === null && nb === null) delete ds.results[gid];
-    else ds.results[gid] = { a: na, b: nb };
-    save(s);
+    if (na === null && nb === null) delete STATE[div].results[gid];
+    else STATE[div].results[gid] = { a: na, b: nb };
+    markEdited();
   }
-  function clearDivision(div) { var s = load(); if (s[div]) s[div].results = {}; save(s); }
-  function getGcLinks(div) { var d = load()[div]; return (d && d.gc) || {}; }
+  function clearDivision(div) { STATE[div].results = {}; markEdited(); }
+  function clearAll() { STATE.major.results = {}; STATE.minor.results = {}; markEdited(); }
+  function getGcLinks(div) { return STATE[div].gc || {}; }
   function setGcLink(div, team, url) {
-    var s = load(), ds = divStore(s, div);
-    if (!url) delete ds.gc[team]; else ds.gc[team] = url;
-    save(s);
+    if (!url) delete STATE[div].gc[team]; else STATE[div].gc[team] = url;
+    markEdited();
   }
-  function exportState() { return load(); }
+  function exportData() {
+    return { major: { results: STATE.major.results, gc: STATE.major.gc },
+             minor: { results: STATE.minor.results, gc: STATE.minor.gc } };
+  }
+  function downloadScores() {
+    var blob = new Blob([JSON.stringify(exportData(), null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = "scores.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+  function applyPublished(p) {
+    ["major", "minor"].forEach(function (d) {
+      STATE[d].results = (p[d] && p[d].results) || {};
+      STATE[d].gc = (p[d] && p[d].gc) || {};
+    });
+  }
+  // Fetch the published scores.json. Skips if you have local edits (unless force=true).
+  // cb(changed) runs after; changed=true means STATE was updated and the page should re-render.
+  function loadPublished(cb, force) {
+    cb = cb || function () {};
+    if (edited && !force) { cb(false); return; }
+    if (typeof fetch !== "function") { cb(false); return; }
+    fetch(SCORES_URL + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (p) {
+        applyPublished(p);
+        if (force) { edited = false; try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+        cb(true);
+      })
+      .catch(function () { cb(false); });
+  }
+  function isEdited() { return edited; }
 
   /* ---------- resolution engine ---------- */
   function norm(x) { return (x || "").toString().trim().toLowerCase(); }
@@ -188,8 +242,9 @@
 
   global.Tournament = {
     DATA: TOURNAMENT,
-    getScore: getScore, setScore: setScore, clearDivision: clearDivision,
-    getGcLinks: getGcLinks, setGcLink: setGcLink, exportState: exportState,
+    getScore: getScore, setScore: setScore, clearDivision: clearDivision, clearAll: clearAll,
+    getGcLinks: getGcLinks, setGcLink: setGcLink, exportData: exportData,
+    downloadScores: downloadScores, loadPublished: loadPublished, isEdited: isEdited,
     winnerSide: winnerSide, resolveSlot: resolveSlot, participants: participants,
     teamFor: teamFor, isPlayable: isPlayable, destOf: destOf,
     memorialSideAt: memorialSideAt, opponentAt: opponentAt, memorialActualPath: memorialActualPath
