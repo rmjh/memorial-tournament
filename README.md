@@ -27,8 +27,22 @@ Once GitHub Pages is enabled, the runner is the homepage:
 | `tournament.js` | Shared bracket data + resolution engine used by both pages |
 | `scores.json` | Published scores everyone loads (updated by the scorekeeper — see below) |
 | `all-game-times.html` | Full printable table of every possible Memorial game, both divisions |
+| `nav.js` | Shared hamburger nav (top-right) injected on every page |
+| `manifest.webmanifest`, `sw.js` | PWA manifest + service worker (installable + offline) |
+| `icon-192.png`, `icon-512.png`, `maskable-512.png` | App icons |
 | `Memorial_Majors_Game_Times.pdf` | One-page Majors reference |
 | `Memorial_Minors_Game_Times.pdf` | One-page Minors reference |
+
+## Install as an app (PWA)
+
+Every page links the manifest and registers a service worker, so the site can be installed to
+a phone's home screen and opened full-screen, and still works offline at the field (it caches
+the pages, then network-first so code and scores stay fresh when there's signal).
+
+- **iPhone (Safari):** Share → **Add to Home Screen**.
+- **Android / desktop Chrome:** **Install app** from the address bar / menu.
+
+The top-right **☰ menu** moves between the planner, bracket tracker, printable schedule, and PDFs.
 
 ## How the tracker works
 

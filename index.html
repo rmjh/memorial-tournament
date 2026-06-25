@@ -7,9 +7,14 @@
 <meta name="description" content="Use this tool to determine when the next Memorial State Tournament may be.">
 <meta name="theme-color" content="#1b5e3f">
 
-<!-- Icons -->
+<!-- Icons + PWA -->
 <link rel="icon" type="image/png" href="favicon.png" sizes="any">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Memorial">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
@@ -154,15 +159,10 @@
     elimination bracket; a second loss ends the run. Each button shows where that result leads next.<br><br>
     Times are scheduled <b>start</b> times and can run early or late (previous game, weather, field prep, umpires) — be in the dugout 30 min early.
     Majors play on the Championship Field (Diamond&nbsp;#3); Minors on the Loyalty Field (Diamond&nbsp;#4).
-    <br><br>
-    <b>Other formats:</b>
-    <a href="bracket/">Live bracket &amp; scores</a> ·
-    <a href="all-game-times.html">Full printable table</a> ·
-    <a href="Memorial_Majors_Game_Times.pdf">Majors PDF</a> ·
-    <a href="Memorial_Minors_Game_Times.pdf">Minors PDF</a>
   </p>
 </div>
 
+<script src="nav.js"></script>
 <script src="tournament.js"></script>
 <script>
 const DIVISIONS = {

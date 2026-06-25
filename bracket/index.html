@@ -8,6 +8,11 @@
 <meta name="theme-color" content="#1b5e3f">
 <link rel="icon" type="image/png" href="../favicon.png" sizes="any">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Memorial">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Memorial Game Time Simulator">
 <meta property="og:title" content="Memorial Tournament Tracker">
@@ -172,12 +177,13 @@
   <p class="foot">
     <b>Enter a final score</b> for each game and the winner advances automatically — undecided games show
     “Winner of Game X” until then. Games with <b>Memorial</b> are outlined in green; the banner up top shows who's next.<br><br>
-    Scores are saved on <b>this device/browser only</b> (nothing is shared or uploaded). Tap a team's
-    <span style="color:var(--win);font-weight:700">GC</span> chip to jump to GameChanger once you've added links.<br><br>
-    <b>Also:</b> <a href="../index.html">Scenario planner</a> · <a href="../all-game-times.html">Printable schedule</a>
+    Scores are saved on your device as you go; the scorekeeper publishes them with <b>Share scores</b> so everyone
+    sees the latest. Tap a team's <span style="color:var(--win);font-weight:700">GC</span> chip to jump to GameChanger
+    once you've added links.
   </p>
 </div>
 
+<script src="../nav.js"></script>
 <script src="../tournament.js"></script>
 <script>
 const T = window.Tournament;
