@@ -119,6 +119,10 @@
 
   .foot{font-size:11px;color:var(--muted);margin-top:22px;line-height:1.5;}
   .foot b{color:var(--ink);}
+  .locknote{font-size:11.5px;color:var(--win);background:var(--win-bg);border:1px solid #c4ddd0;
+    border-radius:8px;padding:7px 10px;margin:8px 0 0;font-weight:600;}
+  .locknote b{font-weight:800;}
+  .crumb.locked{background:var(--win-bg);border-color:#c4ddd0;}
 </style>
 </head>
 <body>
@@ -130,6 +134,7 @@
       <button id="btnMaj" class="active" onclick="setDiv('majors')">Majors</button>
       <button id="btnMin" onclick="setDiv('minors')">Minors</button>
     </div>
+    <p class="locknote" id="lockNote" style="display:none"></p>
   </div>
 
   <div id="stage"></div>
@@ -151,12 +156,14 @@
     Majors play on the Championship Field (Diamond&nbsp;#3); Minors on the Loyalty Field (Diamond&nbsp;#4).
     <br><br>
     <b>Other formats:</b>
+    <a href="bracket/">Live bracket &amp; scores</a> ·
     <a href="all-game-times.html">Full printable table</a> ·
     <a href="Memorial_Majors_Game_Times.pdf">Majors PDF</a> ·
     <a href="Memorial_Minors_Game_Times.pdf">Minors PDF</a>
   </p>
 </div>
 
+<script src="tournament.js"></script>
 <script>
 const DIVISIONS = {
   majors:{
@@ -193,6 +200,33 @@ const DIVISIONS = {
 
 let div = "majors";
 let state = null; // {id, losses, history:[{id,choice,time,n}]}
+let lockedCount = 0; // leading history entries that are real results from the bracket (not undoable)
+
+function tdiv(){ return div==="majors" ? "major" : "minor"; }
+
+// Opponent for the game Memorial is currently at, resolved from real bracket results
+// (falls back to "Winner of Game X" until that game is decided).
+function currentOpponent(){
+  const arrival = state.history.length
+    ? {from: state.history[state.history.length-1].id, res: state.history[state.history.length-1].choice}
+    : null;
+  return Tournament.opponentAt(tdiv(), state.id, arrival);
+}
+
+// Pre-advance Memorial through games that already have real scores in the bracket tracker.
+function applyActuals(){
+  lockedCount = 0;
+  const path = Tournament.memorialActualPath(tdiv());
+  path.forEach(step=>{
+    const node = DIVISIONS[div].games[step.gid];
+    if(!node) return;
+    const t = targetOf(node, step.res);
+    state.history.push({id:step.gid, choice:step.res, time:node.time, n:node.n, locked:true, score:step.score});
+    if(step.res==='L') state.losses++;
+    state.id = t;
+    lockedCount++;
+  });
+}
 
 function setDiv(d){
   div = d;
@@ -202,10 +236,11 @@ function setDiv(d){
 }
 function restart(){
   state = {id: DIVISIONS[div].start, losses:0, history:[]};
+  applyActuals();
   render();
 }
 function goBack(){
-  if(!state.history.length) return;
+  if(state.history.length <= lockedCount) return; // can't undo real (locked) results
   const last = state.history.pop();
   if(last.choice==='L') state.losses = Math.max(0, state.losses-1);
   state.id = last.id;
@@ -245,7 +280,8 @@ function choose(outcome){
 
 function render(){
   const stage = document.getElementById('stage');
-  document.getElementById('backBtn').disabled = state.history.length===0;
+  document.getElementById('backBtn').disabled = state.history.length <= lockedCount;
+  renderLockNote();
   renderPath();
 
   // terminal states
@@ -270,10 +306,11 @@ function render(){
   const g = DIVISIONS[div].games[state.id];
   const winT = describeTarget(targetOf(g,'W'));
   const lossT = describeTarget(targetOf(g,'L'));
+  const opp = currentOpponent();
   let metaBits = [];
   if(g.label) metaBits.push(g.label);
-  if(g.opp) metaBits.push('<span class="opp">'+g.opp+'</span>');
-  const meta = metaBits.length ? '<p class="gmeta">'+metaBits.join(' &nbsp;·&nbsp; ')+'</p>' : '';
+  metaBits.push('vs <span class="opp">'+opp.label+'</span>');
+  const meta = '<p class="gmeta">'+metaBits.join(' &nbsp;·&nbsp; ')+'</p>';
   const note = g.note ? '<p class="gnote">⚠︎ '+g.note+'</p>' : '';
   const badgeTxt = g.type==='win'?'Winners\' Bracket':(g.type==='elim'?'Elimination Bracket':(g.ifnec?'If Necessary':'Championship'));
 
@@ -308,14 +345,29 @@ function terminalHTML(cls,emoji,big,desc){
     </div></div>`;
 }
 
+function renderLockNote(){
+  const el = document.getElementById('lockNote');
+  if(lockedCount<=0){ el.style.display='none'; return; }
+  const lastN = DIVISIONS[div].games[state.history[lockedCount-1].id].n;
+  const terminal = ['CHAMP','RUNNERUP','OUT'].includes(state.id);
+  el.style.display='block';
+  el.innerHTML = terminal
+    ? `✓ <b>Final results</b> from the bracket tracker — Memorial's ${DIVISIONS[div].name} run is complete.`
+    : `✓ <b>Results through ${lastN}</b> are locked in from the bracket tracker. Simulate the rest below.`;
+}
 function renderPath(){
   const box = document.getElementById('pathBox');
   const crumbs = document.getElementById('crumbs');
   if(!state.history.length){ box.style.display='none'; return; }
   box.style.display='block';
-  let html = state.history.map(h =>
-    `<span class="crumb">${h.n} <span class="tm">${h.time}</span> <span class="res ${h.choice}">${h.choice}</span></span>`
-  ).join('<span class="arrowsep">→</span>');
+  let html = state.history.map((h,i) =>{
+    let sc='';
+    if(h.locked && h.score && h.score.a!=null && h.score.b!=null){
+      const hi=Math.max(h.score.a,h.score.b), lo=Math.min(h.score.a,h.score.b);
+      sc = ` <span class="tm">${h.choice==='W'?hi+'–'+lo:lo+'–'+hi}</span>`;
+    }
+    return `<span class="crumb${i<lockedCount?' locked':''}">${h.n} <span class="tm">${h.time}</span>${sc} <span class="res ${h.choice}">${h.choice}</span></span>`;
+  }).join('<span class="arrowsep">→</span>');
   // append where they are now (if still playing)
   if(!['CHAMP','RUNNERUP','OUT'].includes(state.id)){
     const g = DIVISIONS[div].games[state.id];

@@ -7,19 +7,36 @@ Coaches pick **Majors** or **Minors**, then tap **Won** or **Lost** for each gam
 walk Memorial's path through the double-elimination bracket and see exactly when and
 where the next game is.
 
+A companion **tournament tracker** (`/bracket/`) holds the full bracket for both
+divisions — every team and game. Enter a final score for any game and the winner
+advances automatically. Results you enter there feed the scenario runner: once a
+Memorial game has a real score, the runner locks it in and shows the actual opponent
+for upcoming games (so you can simulate only what hasn't been played yet).
+
 ## Live site
 
 Once GitHub Pages is enabled, the runner is the homepage:
-`https://<your-username>.github.io/<repo-name>/`
+`https://rmjh.github.io/memorial-tournament/`
 
 ## Files
 
 | File | What it is |
 |------|------------|
 | `index.html` | Interactive scenario runner (the homepage) |
+| `bracket/index.html` | Full interactive bracket + score tracker for both divisions |
+| `tournament.js` | Shared bracket data + resolution engine used by both pages |
 | `all-game-times.html` | Full printable table of every possible Memorial game, both divisions |
 | `Memorial_Majors_Game_Times.pdf` | One-page Majors reference |
 | `Memorial_Minors_Game_Times.pdf` | One-page Minors reference |
+
+## How the tracker works
+
+- **Scores are saved per browser/device** (`localStorage`) — nothing is uploaded or shared
+  between phones. Each person tracking keeps their own copy.
+- **List & scores** view is chronological with a score box per team; **Bracket** view draws
+  the same data as a double-elim bracket. Games involving Memorial are highlighted.
+- **GameChanger links** can be pasted per team; a `GC` chip then appears for one-tap access
+  to box scores and pitch counts.
 
 ## Notes
 
