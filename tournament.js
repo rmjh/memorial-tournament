@@ -132,6 +132,24 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   }
+  function makeScoresFile() {
+    return new File([JSON.stringify(exportData(), null, 2)], "scores.json", { type: "application/json" });
+  }
+  // True when the device can share a file via the OS share sheet (iOS/Android, secure context).
+  function canShareScores() {
+    try { return !!(navigator.canShare && navigator.canShare({ files: [makeScoresFile()] })); }
+    catch (e) { return false; }
+  }
+  // Open the share sheet with scores.json (so it can go straight to a Working Copy shortcut,
+  // AirDrop, Files, etc.). Falls back to a download where file-sharing isn't supported.
+  function shareScores() {
+    var file = makeScoresFile();
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      return navigator.share({ files: [file], title: "Memorial tournament scores" });
+    }
+    downloadScores();
+    return Promise.resolve();
+  }
   function applyPublished(p) {
     ["major", "minor"].forEach(function (d) {
       STATE[d].results = (p[d] && p[d].results) || {};
@@ -244,7 +262,8 @@
     DATA: TOURNAMENT,
     getScore: getScore, setScore: setScore, clearDivision: clearDivision, clearAll: clearAll,
     getGcLinks: getGcLinks, setGcLink: setGcLink, exportData: exportData,
-    downloadScores: downloadScores, loadPublished: loadPublished, isEdited: isEdited,
+    downloadScores: downloadScores, canShareScores: canShareScores, shareScores: shareScores,
+    loadPublished: loadPublished, isEdited: isEdited,
     winnerSide: winnerSide, resolveSlot: resolveSlot, participants: participants,
     teamFor: teamFor, isPlayable: isPlayable, destOf: destOf,
     memorialSideAt: memorialSideAt, opponentAt: opponentAt, memorialActualPath: memorialActualPath

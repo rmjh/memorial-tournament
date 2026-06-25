@@ -135,8 +135,8 @@
   .steps code{background:#f4f3ee;padding:1px 5px;border-radius:4px;font-size:11.5px;}
   .sharebtns{display:flex;gap:8px;flex-wrap:wrap;}
   .sharebtns button{flex:1;min-width:140px;padding:11px;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;}
-  #btnExport{background:var(--win);color:#fff;}
-  #btnLoadPub{background:var(--card);color:var(--ink);border:1.5px solid var(--line);}
+  #btnShareFile{background:var(--win);color:#fff;}
+  #btnExport,#btnLoadPub{background:var(--card);color:var(--ink);border:1.5px solid var(--line);}
   .danger{font-size:12px;color:var(--muted);margin:14px 0 0;}
   .linkbtn{background:none;border:none;color:var(--lost);font-weight:800;cursor:pointer;padding:0;font-size:12px;text-decoration:underline;}
 
@@ -401,19 +401,33 @@ gcpanel.addEventListener('change', e=>{
   if(view==='list') renderList();
 });
 function renderShare(){
+  const canShare = T.canShareScores();
+  const steps = canShare
+    ? `<ol class="steps">
+        <li>Tap <b>Share scores.json</b> below.</li>
+        <li>In the share sheet, tap your <b>Publish Scores</b> shortcut (it commits &amp; pushes for you).</li>
+        <li>Everyone who opens the page now loads these scores (on refresh).</li>
+      </ol>`
+    : `<ol class="steps">
+        <li>Tap <b>Export scores.json</b> below.</li>
+        <li>On GitHub, open the repo and drag <code>scores.json</code> into the file list (repo root) → <b>Commit changes</b>.</li>
+        <li>Everyone who opens the page now loads these scores (on refresh).</li>
+      </ol>`;
+  const buttons = canShare
+    ? `<button id="btnShareFile">⬆ Share scores.json</button>
+       <button id="btnExport">⬇ Download instead</button>`
+    : `<button id="btnExport">⬇ Export scores.json</button>`;
   sharepanel.innerHTML = `
     <h3>Share scores with everyone</h3>
     <p class="synced">You're the scorekeeper. Publish your scores so anyone who opens the page sees them — no JSON editing needed.</p>
-    <ol class="steps">
-      <li>Tap <b>Export scores.json</b> below.</li>
-      <li>On GitHub, open the repo and drag <code>scores.json</code> into the file list (repo root) → <b>Commit changes</b>.</li>
-      <li>Everyone who opens the page now loads these scores (on refresh).</li>
-    </ol>
+    ${steps}
     <div class="sharebtns">
-      <button id="btnExport">⬇ Export scores.json</button>
+      ${buttons}
       <button id="btnLoadPub">↻ Load published</button>
     </div>
-    <p class="danger">Testing? <button class="linkbtn" id="btnClearAll">Clear all scores</button> wipes every score in both divisions, so you can export a blank file and upload it to remove the test data.</p>`;
+    <p class="danger">Testing? <button class="linkbtn" id="btnClearAll">Clear all scores</button> wipes every score in both divisions, so you can publish a blank file and remove the test data.</p>`;
+  const shareBtn = sharepanel.querySelector('#btnShareFile');
+  if(shareBtn) shareBtn.onclick=()=>{ T.shareScores().catch(()=>{}); };
   sharepanel.querySelector('#btnExport').onclick=()=>T.downloadScores();
   sharepanel.querySelector('#btnLoadPub').onclick=()=>{
     if(confirm('Replace what you see with the latest published scores from GitHub?')){
